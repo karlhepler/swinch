@@ -1,5 +1,4 @@
 var config = {
-    
     /**
      * The duration of the snap, in milliseconds
      *

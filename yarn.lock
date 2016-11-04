@@ -2518,3 +2518,7 @@ yargs@~3.10.0:
     decamelize "^1.0.0"
     window-size "0.1.0"
 
+zenscroll:
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/zenscroll/-/zenscroll-3.2.3.tgz#3cc37a4a00688a947936d1a86a1be403f4e193de"
+
