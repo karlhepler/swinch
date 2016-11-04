@@ -48,7 +48,7 @@ var snapper = function snapper() {
          */
         onClick: function onClick(event) {
             var anchor = event.target;
-            while (anchor && anchor.tagName !== "A") {
+            while (anchor && anchor.tagName !== 'A') {
                 anchor = anchor.parentNode;
             }
 
@@ -69,16 +69,7 @@ var snapper = function snapper() {
             if (href === '#') {
                 event.preventDefault();
                 replaceUrl('');
-
-                // Get the callback arguments, with a little modification
-                var args = getSnapCallbackArguments();
-                args.before[1] = args.after[0] = section[0];
-
-                // Scroll with callbacks
-                config.onBeforeSnap.apply(undefined, args.before);
-                scroller.scrollTo(0, function onScrollToTop() {
-                    config.onSnapped.apply(undefined, args.after);
-                });
+                scrollToWithEvents(section[0]);
 
                 // Return early
                 return;
@@ -92,16 +83,7 @@ var snapper = function snapper() {
             if (targetElem) {
                 event.preventDefault();
                 replaceUrl('#' + targetId);
-
-                // Get the callback arguments, with a little modification
-                var args = getSnapCallbackArguments();
-                args.before[1] = args.after[0] = targetElem;
-
-                // Scroll with callbacks
-                config.onBeforeSnap.apply(undefined, args.before);
-                scroller.scrollTo(targetElem, function onScrollToHash() {
-                    config.onSnapped.apply(undefined, args.after);
-                });
+                scrollToWithEvents(targetElem);
             }
         }
     };
@@ -126,8 +108,8 @@ var snapper = function snapper() {
      */
     function getSnapCallbackArguments() {
         var scrollDirection = {
-            isUp: !viewport.isScrollingUp(),
-            isDown: !viewport.isScrollingDown()
+            isUp: viewport.isScrollingUp(),
+            isDown: viewport.isScrollingDown()
         };
 
         return {
@@ -145,10 +127,16 @@ var snapper = function snapper() {
      */
     function snapToActiveSection(callback) {
         if (config.snapTo !== 'bottom' && viewport.isScrollingDown() || config.snapTo === 'top') {
-            scroller.scrollTo(viewport.top() + section.active().getBoundingClientRect().top, callback);
+            scroller.scrollTo(
+                viewport.top() + section.active().getBoundingClientRect().top,
+                callback
+            );
         }
         else if (config.snapTo !== 'top' && viewport.isScrollingUp() || config.snapTo === 'bottom') {
-            scroller.scrollTo(viewport.top() - viewport.height() + section.active().getBoundingClientRect().bottom, callback);
+            scroller.scrollTo(
+                viewport.top() - viewport.height() + section.active().getBoundingClientRect().bottom,
+                callback
+            );
         }
     }
 
@@ -167,4 +155,29 @@ var snapper = function snapper() {
             // To avoid the Security exception in Chrome when the page was opened via the file protocol, e.g., file://index.html
         }
     } 
+
+    /**
+     * Scroll to a target with events
+     *
+     * @param  {Node} target
+     *
+     * @return {void}
+     */
+    function scrollToWithEvents(target) {
+        // Get the callback arguments, with a little modification
+        var args = getSnapCallbackArguments();
+        args.before[1] = args.after[0] = target;
+
+        // Customize the direction based on the current & next sections
+        args.before[2] = args.after[2] = {
+            isUp: args.before[0].getBoundingClientRect().top > args.before[1].getBoundingClientRect().top,
+            isDown: args.before[0].getBoundingClientRect().top < args.before[1].getBoundingClientRect().top
+        };
+
+        // Scroll with callbacks
+        config.onBeforeSnap.apply(undefined, args.before);
+        scroller.scrollTo(target, function onScrollToHash() {
+            config.onSnapped.apply(undefined, args.after);
+        });
+    }
 };

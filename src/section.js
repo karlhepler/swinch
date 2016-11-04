@@ -1,11 +1,7 @@
 var section = function section() {
     // Instantiate
-    var activeIndex;
-    var lastActiveIndex;
-
-    // Initialize
-    this.updateActive();
-    this.updateLastActive();
+    var _activeIndex = 0;
+    var _lastActiveIndex = 0;
 
     return {
         /**
@@ -14,7 +10,7 @@ var section = function section() {
          * @return {Node}
          */
         active: function active() {
-            return this[activeIndex];
+            return this[_activeIndex];
         },
 
         /**
@@ -23,7 +19,7 @@ var section = function section() {
          * @return {Node}
          */
         lastActive: function lastActive() {
-            return this[lastActiveIndex];
+            return this[_lastActiveIndex];
         },
 
         /**
@@ -38,7 +34,7 @@ var section = function section() {
             }
 
             // Copy the active index so we don't mess it up during the loops
-            var index = activeIndex;
+            var index = _activeIndex;
 
             // If we're scrolling down,
             // find the the first section that has its bottom below the bottom of the viewport
@@ -61,7 +57,15 @@ var section = function section() {
             }
 
             // Set the active index, limit by the last section
-            activeIndex = index >= this.length ? this.length - 1 : index;
+            if (index >= this.length) {
+                _activeIndex = this.length - 1;
+            }
+            else if (index <= 0) {
+                _activeIndex = 0;
+            }
+            else {
+                _activeIndex = index;
+            }
         },
 
         /**
@@ -70,7 +74,7 @@ var section = function section() {
          * @return {void}
          */
         updateLastActive: function updateLastActive() {
-            lastActiveIndex = activeIndex;
+            _lastActiveIndex = _activeIndex;
         },
 
         /**
@@ -79,7 +83,10 @@ var section = function section() {
          * @return {boolean}
          */
         activeChanged: function activeChanged() {
-            return activeIndex !== lastActiveIndex;
+            return _activeIndex !== _lastActiveIndex;
         }
     };
+
+    // Return the api
+    return api;
 };

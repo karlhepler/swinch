@@ -5,9 +5,9 @@ var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var insert = require('gulp-insert');
 var pump = require('pump');
+var fs = require('fs');
 
 var src = [
-    'node_modules/zenscroll/zenscroll.js',
     'src/extend.js',
     'src/merge.js',
     'src/config.js',
@@ -22,7 +22,7 @@ gulp.task('default', function compile(callback) {
     pump([
         gulp.src(src),
         concat('swinch.js'),
-        insert.prepend("'use strict';\n\nwindow.noZensmooth = true;\n\n"),
+        insert.prepend("'use strict';\n\n"),
         umd({
             exports: function exports(file) {
                 return 'swinch';
@@ -31,6 +31,8 @@ gulp.task('default', function compile(callback) {
                 return 'swinch';
             }
         }),
+        insert.prepend(fs.readFileSync('node_modules/zenscroll/zenscroll.js') + '\n\n'),
+        insert.prepend('window.noZensmooth = true;\n\n'),
         gulp.dest('dist'),
         uglify(),
         rename({extname: '.min.js'}),

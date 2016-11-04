@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <style>
+        section {
+            padding: 500px 0;
+        }
+        #one {
+            background-color: red;
+        }
+        #two {
+            background-color: yellow;
+        }
+        #three {
+            background-color: blue;
+        }
+        #four {
+            background-color: green;
+        }
+        header > a {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="#one">One</a>
+        <a href="#two">Two</a>
+        <a href="#three">Three</a>
+        <a href="#four">Four</a>
+    </header>
+    <main>
+        <section id="one"></section>
+        <section id="two"></section>
+        <section id="three"></section>
+        <section id="four"></section>
+    </main>    
+
+    <script src="./dist/swinch.js"></script>
+    <script type="text/javascript">
+        swinch.init(null, {
+            onBeforeSnap: function (current, next, direction) {
+                console.log('onBeforeSnap', current, next, direction);
+            },
+            onSnapped: function (current, previous, direction) {
+                console.log('onSnapped', current, previous, direction);
+            }
+        });
+    </script>
+</body>
+</html>

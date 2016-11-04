@@ -1,4 +1,28 @@
 {
+  "name": "swinch",
+  "version": "1.0.0",
+  "description": "The best vanilla alternative to full-page scroll-controlling javascript plugins",
+  "main": "dist/swinch.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oldtimeguitarguy/swinch.git"
+  },
+  "keywords": [
+    "scroll",
+    "control",
+    "fullpage",
+    "scrollsnap",
+    "snap",
+    "vanilla",
+    "javascript",
+    "zenscroll"
+  ],
+  "author": "Karl Hepler <karl.hepler@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/oldtimeguitarguy/swinch/issues"
+  },
+  "homepage": "https://github.com/oldtimeguitarguy/swinch#readme",
   "devDependencies": {
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",

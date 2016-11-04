@@ -1,14 +1,3 @@
-;(function(root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    define([], factory);
-  } else if (typeof exports === 'object') {
-    module.exports = factory();
-  } else {
-    root.swinch = factory();
-  }
-}(this, function() {
-'use strict';
-
 window.noZensmooth = true;
 
 /**
@@ -297,6 +286,18 @@ window.noZensmooth = true;
 
 }));
 
+
+;(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define([], factory);
+  } else if (typeof exports === 'object') {
+    module.exports = factory();
+  } else {
+    root.swinch = factory();
+  }
+}(this, function() {
+'use strict';
+
 function extend(target, source) {
     for (var prop in source) {
         target[prop] = source[prop];
@@ -452,7 +453,7 @@ var snapper = function snapper() {
          */
         onClick: function onClick(event) {
             var anchor = event.target;
-            while (anchor && anchor.tagName !== "A") {
+            while (anchor && anchor.tagName !== 'A') {
                 anchor = anchor.parentNode;
             }
 
@@ -473,16 +474,7 @@ var snapper = function snapper() {
             if (href === '#') {
                 event.preventDefault();
                 replaceUrl('');
-
-                // Get the callback arguments, with a little modification
-                var args = getSnapCallbackArguments();
-                args.before[1] = args.after[0] = section[0];
-
-                // Scroll with callbacks
-                config.onBeforeSnap.apply(undefined, args.before);
-                scroller.scrollTo(0, function onScrollToTop() {
-                    config.onSnapped.apply(undefined, args.after);
-                });
+                scrollToWithEvents(section[0]);
 
                 // Return early
                 return;
@@ -496,16 +488,7 @@ var snapper = function snapper() {
             if (targetElem) {
                 event.preventDefault();
                 replaceUrl('#' + targetId);
-
-                // Get the callback arguments, with a little modification
-                var args = getSnapCallbackArguments();
-                args.before[1] = args.after[0] = targetElem;
-
-                // Scroll with callbacks
-                config.onBeforeSnap.apply(undefined, args.before);
-                scroller.scrollTo(targetElem, function onScrollToHash() {
-                    config.onSnapped.apply(undefined, args.after);
-                });
+                scrollToWithEvents(targetElem);
             }
         }
     };
@@ -530,8 +513,8 @@ var snapper = function snapper() {
      */
     function getSnapCallbackArguments() {
         var scrollDirection = {
-            isUp: !viewport.isScrollingUp(),
-            isDown: !viewport.isScrollingDown()
+            isUp: viewport.isScrollingUp(),
+            isDown: viewport.isScrollingDown()
         };
 
         return {
@@ -549,10 +532,16 @@ var snapper = function snapper() {
      */
     function snapToActiveSection(callback) {
         if (config.snapTo !== 'bottom' && viewport.isScrollingDown() || config.snapTo === 'top') {
-            scroller.scrollTo(viewport.top() + section.active().getBoundingClientRect().top, callback);
+            scroller.scrollTo(
+                viewport.top() + section.active().getBoundingClientRect().top,
+                callback
+            );
         }
         else if (config.snapTo !== 'top' && viewport.isScrollingUp() || config.snapTo === 'bottom') {
-            scroller.scrollTo(viewport.top() - viewport.height() + section.active().getBoundingClientRect().bottom, callback);
+            scroller.scrollTo(
+                viewport.top() - viewport.height() + section.active().getBoundingClientRect().bottom,
+                callback
+            );
         }
     }
 
@@ -571,16 +560,37 @@ var snapper = function snapper() {
             // To avoid the Security exception in Chrome when the page was opened via the file protocol, e.g., file://index.html
         }
     } 
+
+    /**
+     * Scroll to a target with events
+     *
+     * @param  {Node} target
+     *
+     * @return {void}
+     */
+    function scrollToWithEvents(target) {
+        // Get the callback arguments, with a little modification
+        var args = getSnapCallbackArguments();
+        args.before[1] = args.after[0] = target;
+
+        // Customize the direction based on the current & next sections
+        args.before[2] = args.after[2] = {
+            isUp: args.before[0].getBoundingClientRect().top > args.before[1].getBoundingClientRect().top,
+            isDown: args.before[0].getBoundingClientRect().top < args.before[1].getBoundingClientRect().top
+        };
+
+        // Scroll with callbacks
+        config.onBeforeSnap.apply(undefined, args.before);
+        scroller.scrollTo(target, function onScrollToHash() {
+            config.onSnapped.apply(undefined, args.after);
+        });
+    }
 };
 
 var viewport = function viewport() {
     // Instantiate
-    var top;
-    var lastTop;
-
-    // Initialize
-    this.updateTop();
-    this.updateLastTop();
+    var _top = 0;
+    var _lastTop = 0;
 
     return {
         /**
@@ -589,7 +599,7 @@ var viewport = function viewport() {
          * @return {boolean}
          */
         isAtTop: function isAtTop() {
-            return top <= 0;
+            return _top <= 0;
         },
 
         /**
@@ -598,7 +608,7 @@ var viewport = function viewport() {
          * @return {boolean}
          */
         isScrollingDown: function isScrollingDown() {
-            return top > lastTop;
+            return _top > _lastTop;
         },
 
         /**
@@ -607,7 +617,7 @@ var viewport = function viewport() {
          * @return {boolean}
          */
         isScrollingUp: function isScrollingUp() {
-            return top < lastTop;
+            return _top < _lastTop;
         },
 
         /**
@@ -625,7 +635,7 @@ var viewport = function viewport() {
          * @return {void}
          */
         updateTop: function updateTop() {
-            top = window.pageYOffset;
+            _top = window.pageYOffset;
         },
 
         /**
@@ -634,7 +644,7 @@ var viewport = function viewport() {
          * @return {void}
          */
         updateLastTop: function updateLastTop() {
-            lastTop = window.pageYOffset;
+            _lastTop = window.pageYOffset;
         },
 
         /**
@@ -643,19 +653,15 @@ var viewport = function viewport() {
          * @return {float}
          */
         top: function top() {
-            return top;
+            return _top;
         }
     };
 };
 
 var section = function section() {
     // Instantiate
-    var activeIndex;
-    var lastActiveIndex;
-
-    // Initialize
-    this.updateActive();
-    this.updateLastActive();
+    var _activeIndex = 0;
+    var _lastActiveIndex = 0;
 
     return {
         /**
@@ -664,7 +670,7 @@ var section = function section() {
          * @return {Node}
          */
         active: function active() {
-            return this[activeIndex];
+            return this[_activeIndex];
         },
 
         /**
@@ -673,7 +679,7 @@ var section = function section() {
          * @return {Node}
          */
         lastActive: function lastActive() {
-            return this[lastActiveIndex];
+            return this[_lastActiveIndex];
         },
 
         /**
@@ -688,7 +694,7 @@ var section = function section() {
             }
 
             // Copy the active index so we don't mess it up during the loops
-            var index = activeIndex;
+            var index = _activeIndex;
 
             // If we're scrolling down,
             // find the the first section that has its bottom below the bottom of the viewport
@@ -711,7 +717,15 @@ var section = function section() {
             }
 
             // Set the active index, limit by the last section
-            activeIndex = index >= this.length ? this.length - 1 : index;
+            if (index >= this.length) {
+                _activeIndex = this.length - 1;
+            }
+            else if (index <= 0) {
+                _activeIndex = 0;
+            }
+            else {
+                _activeIndex = index;
+            }
         },
 
         /**
@@ -720,7 +734,7 @@ var section = function section() {
          * @return {void}
          */
         updateLastActive: function updateLastActive() {
-            lastActiveIndex = activeIndex;
+            _lastActiveIndex = _activeIndex;
         },
 
         /**
@@ -729,13 +743,15 @@ var section = function section() {
          * @return {boolean}
          */
         activeChanged: function activeChanged() {
-            return activeIndex !== lastActiveIndex;
+            return _activeIndex !== _lastActiveIndex;
         }
     };
+
+    // Return the api
+    return api;
 };
 
 var swinch = {
-
     /**
      * Initialize swinch & all event listeners
      *
@@ -752,17 +768,23 @@ var swinch = {
         // Merge config with options
         merge(config, options);
 
-        // Extend the given sections with the section object
-        section = extend(sections, section());
-
         // Initialize viewport
         viewport = viewport();
 
+        // Extend the given sections with the section object
+        section = extend(sections, section());
+
         // Initialize scroller
-        scroller = scoller();
+        scroller = scroller();
 
         // Initialize snapper
         snapper = snapper();
+
+        // Initialize viewport & section values
+        viewport.updateTop();
+        section.updateActive();
+        section.updateLastActive();
+        viewport.updateLastTop();
 
         // Add event listeners
         window.addEventListener('scroll', snapper.onScroll, false);
@@ -780,7 +802,6 @@ var swinch = {
         window.removeEventListener('wheel', snapper.onWheel, false);
         window.removeEventListener('click', snapper.onClick, false);
     }
-
 };
 
 return swinch;

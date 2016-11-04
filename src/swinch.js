@@ -1,5 +1,4 @@
 var swinch = {
-
     /**
      * Initialize swinch & all event listeners
      *
@@ -16,17 +15,23 @@ var swinch = {
         // Merge config with options
         merge(config, options);
 
-        // Extend the given sections with the section object
-        section = extend(sections, section());
-
         // Initialize viewport
         viewport = viewport();
 
+        // Extend the given sections with the section object
+        section = extend(sections, section());
+
         // Initialize scroller
-        scroller = scoller();
+        scroller = scroller();
 
         // Initialize snapper
         snapper = snapper();
+
+        // Initialize viewport & section values
+        viewport.updateTop();
+        section.updateActive();
+        section.updateLastActive();
+        viewport.updateLastTop();
 
         // Add event listeners
         window.addEventListener('scroll', snapper.onScroll, false);
@@ -44,5 +49,4 @@ var swinch = {
         window.removeEventListener('wheel', snapper.onWheel, false);
         window.removeEventListener('click', snapper.onClick, false);
     }
-
 };

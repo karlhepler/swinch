@@ -1,11 +1,7 @@
 var viewport = function viewport() {
     // Instantiate
-    var top;
-    var lastTop;
-
-    // Initialize
-    this.updateTop();
-    this.updateLastTop();
+    var _top = 0;
+    var _lastTop = 0;
 
     return {
         /**
@@ -14,7 +10,7 @@ var viewport = function viewport() {
          * @return {boolean}
          */
         isAtTop: function isAtTop() {
-            return top <= 0;
+            return _top <= 0;
         },
 
         /**
@@ -23,7 +19,7 @@ var viewport = function viewport() {
          * @return {boolean}
          */
         isScrollingDown: function isScrollingDown() {
-            return top > lastTop;
+            return _top > _lastTop;
         },
 
         /**
@@ -32,7 +28,7 @@ var viewport = function viewport() {
          * @return {boolean}
          */
         isScrollingUp: function isScrollingUp() {
-            return top < lastTop;
+            return _top < _lastTop;
         },
 
         /**
@@ -50,7 +46,7 @@ var viewport = function viewport() {
          * @return {void}
          */
         updateTop: function updateTop() {
-            top = window.pageYOffset;
+            _top = window.pageYOffset;
         },
 
         /**
@@ -59,7 +55,7 @@ var viewport = function viewport() {
          * @return {void}
          */
         updateLastTop: function updateLastTop() {
-            lastTop = window.pageYOffset;
+            _lastTop = window.pageYOffset;
         },
 
         /**
@@ -68,7 +64,7 @@ var viewport = function viewport() {
          * @return {float}
          */
         top: function top() {
-            return top;
+            return _top;
         }
     };
 };
