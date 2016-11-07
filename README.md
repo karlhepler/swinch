@@ -34,7 +34,7 @@ The best and most flexible alternative to full-page scroll-controlling javascrip
     offset: 0,
 
     /**
-     * Force ScrollControl to snap on a part of each section.
+     * Force snap on a part of each section.
      *
      * null     Snap to the bottom of each section if going up & top if going down.
      * 'top'    Force snap to the top of each section
