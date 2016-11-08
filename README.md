@@ -1,7 +1,9 @@
 # swinch
 The best and most flexible alternative to full-page scroll-controlling javascript plugins
 
-> There are no dependencies!!!
+> There are no runtime dependencies!!!
+
+> The build is dependent on the fantastic [zenscroll](https://github.com/zengabor/zenscroll) plugin!
 
 ## Installation
 
