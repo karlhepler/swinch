@@ -1,6 +1,6 @@
 {
   "name": "swinch",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The best vanilla alternative to full-page scroll-controlling javascript plugins",
   "main": "dist/swinch.js",
   "repository": {

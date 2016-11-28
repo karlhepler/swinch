@@ -40,7 +40,7 @@ var section = function section() {
             // find the the first section that has its bottom below the bottom of the viewport
             if (viewport.isScrollingDown()) {
                 for (index = 0; index < this.length; index++) {
-                    if (this[index].getBoundingClientRect().bottom > viewport.height()) {
+                    if (this[index].getBoundingClientRect().bottom >= viewport.height()) {
                         break;
                     }
                 }
@@ -50,7 +50,7 @@ var section = function section() {
             // find the first section that has its top above the top of the viewport
             else if (viewport.isScrollingUp()) {
                 for (index = this.length - 1; index >= 0; index--) {
-                    if (this[index].getBoundingClientRect().top < 0) {
+                    if (this[index].getBoundingClientRect().top <= 0) {
                         break;
                     }
                 }

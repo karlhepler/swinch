@@ -319,14 +319,20 @@ function merge(target, source) {
 
 var config = {
     /**
-     * The duration of the snap, in milliseconds
+     * The duration of the snap, in milliseconds.
+     * 
+     * This can be overridden with the attribute "swinch-duration" on a section.
+     * ex. <section swinch-duration="1000"></section>
      *
      * @type {Number}
      */
     duration: 500,
 
     /**
-     * The offset of the snapping target
+     * The offset of the snapping target.
+     *
+     * This can be overridden with the attribute "swinch-offset" on a section.
+     * ex. <section swinch-offset="100"></section>
      *
      * @type {Number}
      */
@@ -387,18 +393,32 @@ var scroller = function scroller() {
         /**
          * Scroll to the given top coordinate
          *
-         * @param  {float|Node}    top
-         * @param  {function} callback
+         * @param  {float|Node} top
+         * @param  {function}   callback
+         * @param  {float}      offset
+         * @param  {float}      duration
          *
          * @return {void}
          */
-        scrollTo: function scrollTo(top, callback) {
+        scrollTo: function scrollTo(top, callback, offset, duration) {
+            // Set the offset & duration - possibly custom
+            var offset = offset || config.offset;
+            var duration = duration || config.duration;
+
+            // If it's a number, just scroll to that Y position
             if (typeof top === 'number') {
-                window.zenscroll.toY(top + config.offset, config.duration, callback);
+                window.zenscroll.toY(top + offset, duration, callback);
                 return;
             }
 
-            window.zenscroll.to(top, config.duration, callback);
+            // Set the zenscroll target offset
+            window.zenscroll.setup(duration, offset);
+
+            // Scroll
+            window.zenscroll.to(top, duration, callback);
+
+            // Set the zenscroll target offset back to default
+            window.zenscroll.setup(config.duration, config.offset);
         }
     };
 };
@@ -531,16 +551,24 @@ var snapper = function snapper() {
      * @return {void}
      */
     function snapToActiveSection(callback) {
+        // Get the offset & duration from the element
+        var offset = getOffsetFromElement(section.active());
+        var duration = getDurationFromElement(section.active());
+
         if (config.snapTo !== 'bottom' && viewport.isScrollingDown() || config.snapTo === 'top') {
             scroller.scrollTo(
                 viewport.top() + section.active().getBoundingClientRect().top,
-                callback
+                callback,
+                offset,
+                duration
             );
         }
         else if (config.snapTo !== 'top' && viewport.isScrollingUp() || config.snapTo === 'bottom') {
             scroller.scrollTo(
                 viewport.top() - viewport.height() + section.active().getBoundingClientRect().bottom,
-                callback
+                callback,
+                offset,
+                duration
             );
         }
     }
@@ -569,6 +597,10 @@ var snapper = function snapper() {
      * @return {void}
      */
     function scrollToWithEvents(target) {
+        // Get the offset & duration from the element
+        var offset = getOffsetFromElement(target);
+        var duration = getDurationFromElement(target);
+
         // Get the callback arguments, with a little modification
         var args = getSnapCallbackArguments();
         args.before[1] = args.after[0] = target;
@@ -583,7 +615,37 @@ var snapper = function snapper() {
         config.onBeforeSnap.apply(undefined, args.before);
         scroller.scrollTo(target, function onScrollToHash() {
             config.onSnapped.apply(undefined, args.after);
-        });
+        }, offset, duration);
+    }
+
+    /**
+     * Get the offset value from the given element
+     *
+     * @param  {mixed} elem
+     *
+     * @return {float|undefined}
+     */
+    function getOffsetFromElement(elem) {
+        if (elem instanceof window.Element && elem.hasAttribute('swinch-offset')) {
+            return parseFloat(elem.getAttribute('swinch-offset'));
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Get the duration value from the given element
+     *
+     * @param  {mixed} elem
+     *
+     * @return {float|undefined}
+     */
+    function getDurationFromElement(elem) {
+        if (elem instanceof window.Element && elem.hasAttribute('swinch-duration')) {
+            return parseFloat(elem.getAttribute('swinch-duration'));
+        }
+
+        return undefined;
     }
 };
 
@@ -700,7 +762,7 @@ var section = function section() {
             // find the the first section that has its bottom below the bottom of the viewport
             if (viewport.isScrollingDown()) {
                 for (index = 0; index < this.length; index++) {
-                    if (this[index].getBoundingClientRect().bottom > viewport.height()) {
+                    if (this[index].getBoundingClientRect().bottom >= viewport.height()) {
                         break;
                     }
                 }
@@ -710,7 +772,7 @@ var section = function section() {
             // find the first section that has its top above the top of the viewport
             else if (viewport.isScrollingUp()) {
                 for (index = this.length - 1; index >= 0; index--) {
-                    if (this[index].getBoundingClientRect().top < 0) {
+                    if (this[index].getBoundingClientRect().top <= 0) {
                         break;
                     }
                 }

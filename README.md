@@ -22,14 +22,20 @@ The best and most flexible alternative to full-page scroll-controlling javascrip
 ```js
 {
     /**
-     * The duration of the snap, in milliseconds
+     * The duration of the snap, in milliseconds.
+     * 
+     * This can be overridden with the attribute "swinch-duration" on a section.
+     * ex. <section swinch-duration="1000"></section>
      *
      * @type {Number}
      */
     duration: 500,
 
     /**
-     * The offset of the snapping target
+     * The offset of the snapping target.
+     *
+     * This can be overridden with the attribute "swinch-offset" on a section.
+     * ex. <section swinch-offset="100"></section>
      *
      * @type {Number}
      */

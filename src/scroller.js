@@ -15,18 +15,32 @@ var scroller = function scroller() {
         /**
          * Scroll to the given top coordinate
          *
-         * @param  {float|Node}    top
-         * @param  {function} callback
+         * @param  {float|Node} top
+         * @param  {function}   callback
+         * @param  {float}      offset
+         * @param  {float}      duration
          *
          * @return {void}
          */
-        scrollTo: function scrollTo(top, callback) {
+        scrollTo: function scrollTo(top, callback, offset, duration) {
+            // Set the offset & duration - possibly custom
+            var offset = offset || config.offset;
+            var duration = duration || config.duration;
+
+            // If it's a number, just scroll to that Y position
             if (typeof top === 'number') {
-                window.zenscroll.toY(top + config.offset, config.duration, callback);
+                window.zenscroll.toY(top + offset, duration, callback);
                 return;
             }
 
-            window.zenscroll.to(top, config.duration, callback);
+            // Set the zenscroll target offset
+            window.zenscroll.setup(duration, offset);
+
+            // Scroll
+            window.zenscroll.to(top, duration, callback);
+
+            // Set the zenscroll target offset back to default
+            window.zenscroll.setup(config.duration, config.offset);
         }
     };
 };

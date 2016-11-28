@@ -126,16 +126,24 @@ var snapper = function snapper() {
      * @return {void}
      */
     function snapToActiveSection(callback) {
+        // Get the offset & duration from the element
+        var offset = getOffsetFromElement(section.active());
+        var duration = getDurationFromElement(section.active());
+
         if (config.snapTo !== 'bottom' && viewport.isScrollingDown() || config.snapTo === 'top') {
             scroller.scrollTo(
                 viewport.top() + section.active().getBoundingClientRect().top,
-                callback
+                callback,
+                offset,
+                duration
             );
         }
         else if (config.snapTo !== 'top' && viewport.isScrollingUp() || config.snapTo === 'bottom') {
             scroller.scrollTo(
                 viewport.top() - viewport.height() + section.active().getBoundingClientRect().bottom,
-                callback
+                callback,
+                offset,
+                duration
             );
         }
     }
@@ -164,6 +172,10 @@ var snapper = function snapper() {
      * @return {void}
      */
     function scrollToWithEvents(target) {
+        // Get the offset & duration from the element
+        var offset = getOffsetFromElement(target);
+        var duration = getDurationFromElement(target);
+
         // Get the callback arguments, with a little modification
         var args = getSnapCallbackArguments();
         args.before[1] = args.after[0] = target;
@@ -178,6 +190,36 @@ var snapper = function snapper() {
         config.onBeforeSnap.apply(undefined, args.before);
         scroller.scrollTo(target, function onScrollToHash() {
             config.onSnapped.apply(undefined, args.after);
-        });
+        }, offset, duration);
+    }
+
+    /**
+     * Get the offset value from the given element
+     *
+     * @param  {mixed} elem
+     *
+     * @return {float|undefined}
+     */
+    function getOffsetFromElement(elem) {
+        if (elem instanceof window.Element && elem.hasAttribute('swinch-offset')) {
+            return parseFloat(elem.getAttribute('swinch-offset'));
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Get the duration value from the given element
+     *
+     * @param  {mixed} elem
+     *
+     * @return {float|undefined}
+     */
+    function getDurationFromElement(elem) {
+        if (elem instanceof window.Element && elem.hasAttribute('swinch-duration')) {
+            return parseFloat(elem.getAttribute('swinch-duration'));
+        }
+
+        return undefined;
     }
 };
