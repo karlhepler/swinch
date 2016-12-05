@@ -1,5 +1,5 @@
 # swinch
-The best and most flexible alternative to full-page scroll-controlling javascript plugins
+It's a vanilla.js page section snapper thingy
 
 > There are no runtime dependencies!!!
 
