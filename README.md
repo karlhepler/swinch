@@ -5,6 +5,8 @@ It's a vanilla.js page section snapper thingy
 
 > The build is dependent on the fantastic [zenscroll](https://github.com/zengabor/zenscroll) plugin!
 
+> It's a little buggy. Check out the github issues to see what I'm talking about. After building this, I ended up using a similar jQuery plugin in my own project and never actually used this.
+
 ## Installation
 
 1. `npm install swinch`, `bower install swinch`, `yarn add swinch`
